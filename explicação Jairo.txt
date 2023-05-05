@@ -1,0 +1,87 @@
+Bom, devido a alterações nas versões do Angular, as variáveis precisam ser inicializadas,
+por isso o erro nos vetores e nos atributos da classe curso.ts. Você pode tentar
+realizar o downgrade da versão do Angular para uma versão 15.0 mas o jeito mais fácil
+de resolver isso é ajustando o código à sua versão atual, ou seja, você vai inicializar
+as variáveis conforme abaixo: 
+
+export class Curso{
+    
+    // atributos
+    nomeCurso: string = ''; 
+    valorCurso: number = 0; 
+    idCurso: number = 0; 
+
+}
+
+O vetor também: vetor: Curso[] = [];
+
+
+Esse outro erro no método obterCursos é porque a forma de implementar também mudou.
+Tenta assim: obterCursos():Observable<Curso[]>{   
+    return this.http.get(this.url+"listar")   
+    .pipe( map((res:any) =>{  //tipar o res com any  
+       this.vetor = res; // remover o res['curso']
+       return this.vetor;
+      }))
+    }
+
+No arquivo listar.php você vai fazer as seguintes modificações:
+
+1º Tira o var_dump($cursos); pois ele dá erro de requisição.
+2º No json_encode ele deve ficar assim: json_encode($cursos);
+
+A respeito da URL dentro do curso.component.ts ela não é obrigatória, então pode apagar ela, mas deixa 
+o vetor, eles tem seus motivos para estarem ali. Só o curso.service que precisa estar com a variável de 
+URL declarada. Inclusive, falando nela, é necessário ela estar declarada assim: url = "http://localhost:8080/api/php/";
+na aula ele diz que o 8080 não faz diferença, mas faz sim pois ele não renderiza se tiver faltando.
+
+
+No construtor do curso.component.ts não é necessário o private httpClient pois ele já foi definido 
+dentro do curso.service.ts que é onde ele é realmente usado, por isso ele foi retirado, mas o 
+CursoService precisava ser obrigatoriamente definido no construtor para ser utilizado pela classe.
+
+
+O objeto que foi criado no curso.component.ts curso = new Curso() não foi utilizado na listagem, mas 
+ele será usado depois para criar outros métodos, como por exemplo, o de cadastrar, excluir, onde ele vai 
+precisar receber como parâmetro um objeto do tipo Curso.
+
+_______________________________________________________________________________________________________
+
+A respeito das aulas de cadastro, eles implementa os métodos nas duas aulas mas o formulário ele não
+mostra criando. Mas quando você começar a aula 7A, ele vai mostrar a tela do curso.component.html com
+o form já criado, você pausa a aula e cria ele. Mas já vou adiantar que vai apresentar alguns erros,
+então já vou te dar a solução:
+
+# Alteração na API cadastrar.php
+
+$nomeCurso = $extrair -> nomeCurso;
+$valorCurso = $extrair -> valorCurso;
+
+json_encode($curso);
+
+# No Front(curso.component.html)
+
+1.
+
+<button (click)="cadastro()">Cadastrar</button> //Na aula vai ter um this.curso dentro da chamada do
+método, mas você não coloca, deixa vazio pois o método cadastro não pede argumento.
+
+2. Em curso.component.ts
+
+  cadastro(){
+    this.curso_service.cadastrarCurso(this.curso).subscribe(
+      (res: Curso) => {
+        //Limpar os atributos
+        this.curso.nomeCurso = ""; //Você não vai conseguir colocar null para limpar
+        this.curso.valorCurso = 0;
+        //atualizando listagem com o novo cadastro
+        this.selecao(); //Não precisa do vetor. O método selecao já trás todos os dados do banco.
+      } 
+    );
+  }
+
+3.Em cursos.service:
+
+cadastrarCurso(curso:Curso):Observable<Curso>{
+    return this.http.post<Curso>(this.url+'cadastrar',curso) 
+  }
