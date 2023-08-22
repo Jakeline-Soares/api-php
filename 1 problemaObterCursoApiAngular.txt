@@ -1,0 +1,30 @@
+ATENÇÃO ! ATUALIZE A API 
+
+
+Fazer cada passo abaixo para o método obterCurso funcionar no FRONT:
+
+1.Problema de Cors:
+Colocar o . no arquivo .htaccess (vai resolver o problema de cors) arquivo não é htaccess e sim .htaccess
+
+Alterações no arquivo listar.php
+
+1. Comentar a linha que imprime o vetor (Obrigatório para seu método no FRONT funcionar)
+//var_dump($cursos) 
+
+
+2. Inserir o echo e deixar apenas o ($cursos):
+echo json_encode($cursos);  
+
+
+Alterações no curso.component.ts: 
+1. Atualize seu método de Obter cursos:       
+      
+    obterCursos():Observable<Curso[]>{   
+      return this.http.get(this.url+"listar")   
+      .pipe( map((res:any) =>{    
+         this.vetor = res; // remover o res['curso']
+         return this.vetor;
+        }
+        )
+      )
+    }
